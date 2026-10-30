@@ -45,7 +45,7 @@ def before_after(before, after, n_faces, title=None):
     canvas.paste(b, (a.width + gap, head))
     d = ImageDraw.Draw(canvas)
     f = _font(52)
-    text = title or "Tự động che mặt trong 1 giây – offline, miễn phí"
+    text = title or "Che mặt tự động – chạy offline"
     l, t, r, bb = d.textbbox((0, 0), text, font=f)
     d.text(((canvas.width - (r - l)) // 2 - l, (head - (bb - t)) // 2 - t), text, font=f, fill="white")
     return cv2.cvtColor(np.array(canvas), cv2.COLOR_RGB2BGR)

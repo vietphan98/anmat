@@ -1,6 +1,8 @@
-# anmat – Ẩn mặt tự động trong 1 giây
+# anmat – Ẩn mặt tự động, chạy offline
 
-Chụp ảnh nhóm, quay video ngoài đường muốn đăng lên mạng nhưng **không muốn lộ mặt người lạ**? `anmat` tự tìm **mọi khuôn mặt** trong ảnh hoặc video rồi che lại (làm mờ, pixel, hộp đen hoặc mặt cười) – chạy **offline trên máy bạn**, miễn phí, không upload ảnh lên đâu cả.
+Chụp ảnh nhóm, quay video ngoài đường muốn đăng lên mạng nhưng **không muốn lộ mặt người lạ**? `anmat` tự dò các khuôn mặt trong ảnh hoặc video rồi che lại (làm mờ, pixel, hộp đen hoặc mặt cười) – chạy **offline trên máy bạn**, miễn phí, không upload ảnh lên đâu cả.
+
+> ⚠️ Công cụ có thể **bỏ sót** mặt nhỏ, mặt quay nghiêng hoặc bị che khuất. Luôn **kiểm tra lại ảnh/video kết quả** trước khi đăng.
 
 ![Trước / sau – làm mờ](docs/truoc_sau_mo.jpg)
 
@@ -10,7 +12,7 @@ Chụp ảnh nhóm, quay video ngoài đường muốn đăng lên mạng nhưng
 
 ## Tính năng
 
-- Nhận diện khuôn mặt bằng mạng nơ-ron nhỏ (~230KB) của OpenCV, tự tải ở lần chạy đầu; không có mạng thì tự chuyển sang bộ dò Haar có sẵn.
+- Nhận diện khuôn mặt bằng model YuNet (~230KB, OpenCV Zoo) chạy qua `cv2.FaceDetectorYN`, tự tải về `~/.cache/anmat` ở lần chạy đầu; nếu không tải được thì chuyển sang Haar cascade `haarcascade_frontalface_default.xml` có sẵn trong gói OpenCV (chỉ dò tốt mặt nhìn thẳng, kém chính xác hơn).
 - 4 kiểu che: `mo` (mờ elip viền mềm), `pixel`, `den` (hộp đen), `emoji` (mặt cười).
 - Xử lý **ảnh, video, hoặc cả thư mục** một lần.
 - Tuỳ chọn xuất **ảnh so sánh TRƯỚC / SAU** có chữ tiếng Việt – đăng mạng xã hội luôn.
@@ -57,11 +59,11 @@ Kết quả được lưu cạnh file gốc với hậu tố `_anmat`.
 ## Demo quay Reel (20–30 giây)
 
 1. Mở ảnh nhóm `examples/phi-hanh-doan.jpg` cho người xem thấy 7 gương mặt rõ nét.
-2. Gõ lệnh `python -m anmat examples/phi-hanh-doan.jpg --kieu emoji --so-sanh` – terminal báo "7 mặt, 0.06s".
-3. Mở `phi-hanh-doan_truoc_sau.jpg`: bên trái mặt rõ, bên phải 7 mặt cười che kín.
+2. Gõ lệnh `python -m anmat examples/phi-hanh-doan.jpg --kieu emoji --so-sanh` – terminal báo số mặt tìm được và thời gian xử lý (trên máy thử nghiệm, với ảnh mẫu này, mất khoảng 0,06 giây; thời gian thực tế tuỳ cấu hình máy và kích thước ảnh).
+3. Mở `phi-hanh-doan_truoc_sau.jpg`: bên trái mặt rõ, bên phải các mặt đã được che – vẫn nên soát lại xem có sót mặt nào không.
 4. Chạy lại với `--kieu mo` và `--kieu pixel` để đổi kiểu trong vài giây.
 
-**Câu hook gợi ý cho Reel:** "Đăng ảnh nhóm mà sợ lộ mặt người lạ? Một dòng lệnh, 0,1 giây, che sạch mọi khuôn mặt – không cần app trả phí!"
+**Câu hook gợi ý cho Reel:** "Đăng ảnh nhóm mà sợ lộ mặt người lạ? Một dòng lệnh để tự động che mặt, chạy offline – nhớ soát lại trước khi đăng!"
 
 ## Giới hạn
 
@@ -70,9 +72,21 @@ Kết quả được lưu cạnh file gốc với hậu tố `_anmat`.
 
 ## Ghi công
 
-- Model nhận diện khuôn mặt YuNet thuộc [OpenCV Zoo](https://github.com/opencv/opencv_zoo) (giấy phép MIT), được tải về lúc chạy, không đi kèm repo.
 - Ảnh mẫu là ảnh chân dung phi hành đoàn của NASA (phạm vi công cộng – public domain), lấy từ Wikimedia Commons.
 
+## Giấy phép bên thứ ba
+
+`anmat` sử dụng các thành phần sau (không có thành phần nào được đóng gói sẵn trong repo; chúng được cài qua `pip` hoặc tải về lúc chạy):
+
+| Thành phần | Cách dùng | Giấy phép |
+|---|---|---|
+| [OpenCV](https://github.com/opencv/opencv) (`opencv-python-headless`) | Đọc/ghi ảnh, video, làm mờ, chạy model | Apache-2.0 |
+| Model YuNet `face_detection_yunet_2023mar.onnx` từ [OpenCV Zoo](https://github.com/opencv/opencv_zoo/tree/main/models/face_detection_yunet) | Tải về lúc chạy lần đầu | MIT (© 2020 Shiqi Yu) |
+| Haar cascade `haarcascade_frontalface_default.xml` | Dự phòng khi không tải được YuNet; đi kèm gói OpenCV | Intel License Agreement for Open Source Computer Vision Library (kiểu BSD) |
+| [NumPy](https://numpy.org) | Xử lý mảng ảnh | BSD-3-Clause |
+| [Pillow](https://python-pillow.org) | Vẽ chữ tiếng Việt lên ảnh so sánh | MIT-CMU (HPND) |
+
+Font chữ trên ảnh so sánh lấy từ font đã cài sẵn trên máy (không đóng gói kèm repo).
 ## Giấy phép
 
 MIT © 2026 Viet Phan
